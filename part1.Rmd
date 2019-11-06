@@ -1,0 +1,81 @@
+---
+title: 'Course Project: Simulation Exercise'
+author: "Gemelee Hirang"
+output: pdf_document
+---
+
+## Title: Course Project: Simulation Exercise 
+
+## Overview 
+
+A randomly generated exponential distribution is examined to determine whether it is consistent with the Central Limit Theorem. A thousand simulations of the distribution of the means of 40 exponentials are generated for this purpose. 
+
+## Simulations 
+
+To start, we load the Tidyverse package as this will be used in this analysis. We also set the default values as given in the instructions. 
+
+```{r tidyverse, echo = TRUE}
+library(tidyverse)
+set.seed(500)
+lambda <- 0.2 
+B <- 1000
+n <- 40 
+```
+
+We examine a randomly generated exponential distribution with 40 observations and a rate of 0.2 The data is not normally distributed. 
+
+```{r distribution of 40 observations, echo = TRUE}
+hist(rexp(n, lambda))
+```
+
+Next, we run the simulation 1000 times, and obtain the means of the 40 exponentials for each simulation. 
+
+```{r simulation, echo = TRUE}
+meansExponentials <- NULL
+for (i in 1:B) meansExponentials = c(meansExponentials, mean(rexp(n, lambda)))
+```
+
+## Sample Mean versus Theoretical Mean 
+
+We compare the sample mean from the exponential distribution with the theoretical mean. 
+
+```{r means, echo = TRUE}
+theoreticalMean <- 1/lambda
+sampleMean <- mean(meansExponentials)
+```
+
+The theoretical mean is `r theoreticalMean`, and the sample mean is `r sampleMean`. The 2 values are very close. 
+
+The figure below shows how close the 2 means are. The theoretical mean is represented by the red vertical line, and the sample mean by the blue vertical line. 
+
+```{r figure1, echo = TRUE}
+
+    ggplot(NULL, aes(meansExponentials)) + geom_histogram(aes(y = ..density..), color = "gray") +
+    geom_vline(xintercept = theoreticalMean, color = "red") + 
+    geom_vline(xintercept = sampleMean, color = "blue") + 
+    stat_function(fun = dnorm, args = list(mean = theoreticalMean, sd = 1/(lambda * sqrt(n))), color = "red", size = 1.0) + 
+    stat_function(fun = dnorm, args = list(mean = sampleMean, sd = sd(meansExponentials)), color = "blue", size = 1.0) + 
+    labs(title = "Distribution", x = "Sample Means", y = "Density") + 
+    theme(legend.position = "right")
+```
+
+## Sample Variance versus Theoretical Variance 
+
+We now compare the sample variance with the theoretical variance. 
+
+```{r variance and sd, echo = TRUE}
+theoreticalVariance <- 1/(lambda^2 * n)
+sampleVariance <- var(meansExponentials)
+theoreticalSD <- 1/(lambda * sqrt(n))
+sampleSD <- sd(meansExponentials)
+```
+
+The theoretical and sample variances are very close. The theoretical variance is `r theoreticalVariance`, and the sample variance is `r sampleVariance`. The same is true for the standard deviations: the theoretical standard deviation is `r theoreticalSD`, and the sample standard deviation is `r sampleSD`. 
+
+## Distribution 
+
+The sample means are consistent with the Central Limit Theorem. This is illustrated by the QQ plot of these values below. The plots closely follow the straight line, with deviations at extreme values. Thus, the sample means are normally distributed. 
+
+```{r figure2, echo = TRUE}
+qqnorm(meansExponentials); qqline(meansExponentials)
+```
